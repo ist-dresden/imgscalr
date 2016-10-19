@@ -1058,9 +1058,12 @@ public class Scalr {
 
 		Graphics g = result.getGraphics();
 
-		// "Clear" the background of the new image with our padding color first.
+		// Draw the border of the image in the color specified.
 		g.setColor(color);
-		g.fillRect(0, 0, newWidth, newHeight);
+		g.fillRect(0, 0, newWidth, padding);
+		g.fillRect(0, padding, padding, newHeight);
+		g.fillRect(padding, newHeight - padding, newWidth, newHeight);
+		g.fillRect(newWidth - padding, padding, newWidth, newHeight - padding);
 
 		// Draw the image into the center of the new padded image.
 		g.drawImage(src, padding, padding, null);
@@ -1653,7 +1656,7 @@ public class Scalr {
 				 * re-calculate a proportionally correct value based on the
 				 * targetWidth.
 				 */
-				targetHeight = Math.round((float) targetWidth * ratio);
+				targetHeight = (int)Math.ceil((float) targetWidth * ratio);
 
 				if (DEBUG && originalTargetHeight != targetHeight)
 					log(1,
@@ -1857,7 +1860,7 @@ public class Scalr {
 
 			// Reminder: newWidth == result.getHeight() at this point
 			tx.translate(newWidth, 0);
-			tx.rotate(Math.toRadians(90));
+			tx.quadrantRotate(1);
 
 			break;
 
@@ -1871,12 +1874,12 @@ public class Scalr {
 
 			// Reminder: newHeight == result.getWidth() at this point
 			tx.translate(0, newHeight);
-			tx.rotate(Math.toRadians(-90));
+			tx.quadrantRotate(3);
 			break;
 
 		case CW_180:
 			tx.translate(newWidth, newHeight);
-			tx.rotate(Math.toRadians(180));
+			tx.quadrantRotate(2);
 			break;
 
 		case FLIP_HORZ:
@@ -2030,9 +2033,9 @@ public class Scalr {
 	 */
 	protected static BufferedImage createOptimalImage(BufferedImage src,
 			int width, int height) throws IllegalArgumentException {
-		if (width < 0 || height < 0)
+		if (width <= 0 || height <= 0)
 			throw new IllegalArgumentException("width [" + width
-					+ "] and height [" + height + "] must be >= 0");
+					+ "] and height [" + height + "] must be > 0");
 
 		return new BufferedImage(
 				width,
